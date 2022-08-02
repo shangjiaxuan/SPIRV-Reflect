@@ -239,8 +239,14 @@ typedef struct SpvReflectPrvEvaluationNode {
 
     uint32_t                        specId;
 
+    // to be removed...
     uint32_t                        related_id_count;
     uint32_t*                       related_specId;
+
+    uint32_t                        num_id_operands;
+    SpvReflectPrvEvaluationNode**   id_operands;
+    uint32_t                        num_literal_words;
+    uint32_t*                       literal_words;
 } SpvReflectPrvEvaluationNode;
 // clang-format on
 
@@ -263,8 +269,14 @@ typedef struct SpvReflectEvaluation {
 
     // To flag dry run and tree traversal...
     SpvReflectEvaluationFlag              flags;
+
     // holds the buffer that stores spec id relations
+    // to be removed
     uint32_t* specId_relation_buffer;
+
+    SpvReflectPrvEvaluationNode**         id_operand_buffer;
+    uint32_t*                             literal_word_buffer;
+
     // ohh I hope I could decouple this... But FindType uses this...
     // just a reference
     SpvReflectShaderModule*               member_type_finder;
@@ -6057,12 +6069,10 @@ SpvReflectResult CopyValueData(const SpvReflectTypeDescription* type, SpvReflect
 #define DO_BINARY_SINTEGER_LOGICAL_OPERATION(p_result, simple_op_eval, simple_op_node, operation, res, CLEANUP) \
     DO_BINARY_INTEGER_LOGICAL_OPERATION(p_result, simple_op_eval, simple_op_node, operation, sint32_value, sint64_value, res, CLEANUP)
 
-// Used for calculating specialization constants.
-// The switches are not necessary for littel endian cpu,
-// but still there just in case.
-// memcpy is required since c/c++ have strict aliasing rules
-// access to signed and unsigned versions of same width integer's
-// address does not violate strict aliasing rules
+
+// change implementation to use SpvReflectPrvEvaluationNode* and SpvReflectEvaluation* p_eval as the only two parameters
+// node is the node to evaluate, p_eval != NULL signals AST building. 2 passes of ast building will be 
+// labeled in p_eval's flags
 SpvReflectResult EvaluateResultImpl(SpvReflectEvaluation* p_eval, uint32_t result_id, const SpvReflectValue** p_result)
 {
     SpvReflectResult res = SPV_REFLECT_RESULT_SUCCESS;
@@ -6933,6 +6943,7 @@ SpvReflectResult EvaluateResultImpl(SpvReflectEvaluation* p_eval, uint32_t resul
 
 SpvReflectEvaluation* spvReflectGetEvaluationInterface(SpvReflectShaderModule* p_module)
 {
+    // build ast here.
     return p_module->_internal->evaluator;
 }
 
