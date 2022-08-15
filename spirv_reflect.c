@@ -7456,6 +7456,24 @@ int spvReflectIsRelatedToSpecId(SpvReflectEvaluation* p_eval, uint32_t result_id
   return HaveNodeInTree(p_node, p_spec, false);
 }
 
+#if _SPIRV_REFLECT_USE_VULKAN_H_
+#include <vulkan/vulkan.h>
+#else
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationInfo {
+  uint32_t                          mapEntryCount;
+  const VkSpecializationMapEntry*   pMapEntries;
+  size_t                            dataSize;
+  const void*                       pData;
+} VkSpecializationInfo;
+// Provided by VK_VERSION_1_0
+typedef struct VkSpecializationMapEntry {
+  uint32_t                          constantID;
+  uint32_t                          offset;
+  size_t                            size;
+} VkSpecializationMapEntry;
+#endif
+
 
 SpvReflectResult spvReflectGetSpecializationInfo(const SpvReflectEvaluation* p_eval, VkSpecializationInfo* info, VkSpecializationMapEntry* p_modifiable, uint32_t num_entries)
 {
@@ -7576,7 +7594,12 @@ SpvReflectEvaluation* spvReflectDuplicateEvaluation(const SpvReflectEvaluation* 
 
 void spvReflectDestroyDuplicatedEvaluation(SpvReflectEvaluation* p_eval)
 {
-  
+  if(!p_eval) return;
+  if(p_eval->member_type_finder->_internal->evaluator == p_eval) {
+    return;
+  }
+  DestroyEvaluator(p_eval);
+  SafeFree(p_eval);
 }
 
 
@@ -7630,5 +7653,15 @@ SpvReflectResult spvReflectGetSpecializationInfo(const SpvReflectEvaluation* p_e
   return SPV_REFLECT_RESULT_ERROR_SPIRV_EVAL_TREE_INIT_FAILED;
 }
 
+SpvReflectEvaluation* spvReflectDuplicateEvaluation(const SpvReflectEvaluation* p_eval)
+{
+  (void)p_eval;
+  return NULL;
+}
+
+void spvReflectDestroyDuplicatedEvaluation(SpvReflectEvaluation* p_eval)
+{
+  (void)p_eval;
+}
 #endif
 
