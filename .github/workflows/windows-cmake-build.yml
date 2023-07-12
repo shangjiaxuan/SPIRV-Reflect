@@ -1,7 +1,8 @@
 name: Windows build
 
 on:
-  pull_request:
+  push:
+    branches: [test-workflow]
 
 # Cancel previous runs if a more recent commit is pushed.
 concurrency:

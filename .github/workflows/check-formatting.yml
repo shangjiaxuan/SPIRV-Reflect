@@ -1,8 +1,8 @@
 name: Code formatting check
 
 on:
-  pull_request:
-
+  push:
+    branches: [test-workflow]
 # Cancel previous runs if a more recent commit is pushed.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
