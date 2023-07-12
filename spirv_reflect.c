@@ -26,6 +26,7 @@
   #include <crtdbg.h>
 #else
   #include <stdlib.h>
+  #include <stddef.h>   // for offsetof on linux
 #endif
 
 #if defined(__clang__) || defined(__GNUC__) || defined(__APPLE_CC__)
